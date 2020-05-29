@@ -1,7 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+
+import 'package:qrapp/src/bloc/Scans_bloc.dart';
+import 'package:qrapp/src/models/scan_model.dart';
+
 import 'package:qrapp/src/pages/direcciones_page.dart';
 import 'package:qrapp/src/pages/mapas_page.dart';
-import 'package:qrapp/src/providers/db_provider.dart';
+
+import 'package:barcode_scan/barcode_scan.dart';
+
+import 'package:qrapp/src/utils/utils.dart' as utils;
 
 class HomePage extends StatefulWidget {
   @override
@@ -9,7 +18,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  
   int currentIndex=0;
+  final scansBloc = new ScansBloc();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +30,7 @@ class _HomePageState extends State<HomePage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.delete_forever), 
-            onPressed: (){} 
+            onPressed:scansBloc.borrarScansTodos,
           )
         ],
       ),
@@ -28,29 +40,37 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).primaryColor,
         child: Icon(Icons.filter_center_focus),
-        onPressed: _scanQR,
+        onPressed:() => _scanQR(context),
       ),
     );
   }
 
-  _scanQR() async{
+  _scanQR(BuildContext context) async{
 
     //https://fernando-herrera.com
     //geo:40.73255860802501,-73.89333143671877
 
-    dynamic futureString ='https://aobio-993a6.firebaseapp.com/#/homeS';
- 
-    /*try {
+    //dynamic futureString ='https://aobio-993a6.firebaseapp.com/#/homeS';
+    dynamic futureString;
+    try {
       futureString = await BarcodeScanner.scan();
     }catch(e){
       futureString=e.toString();
-    }*/
+    }
  
     //print('Future String: ${futureString.rawContent}');
 
     if(futureString != null){
-      final scan = ScanModel(valor:futureString );
-      DBProvider.db.nuevoScan(scan);
+      final scan = ScanModel(valor:futureString.rawContent);
+      scansBloc.agregarScan(scan);
+
+      if(Platform.isIOS){
+        Future.delayed(Duration(milliseconds: 750),(){
+          utils.abrirScan(context, scan);
+        });
+      }else{
+        utils.abrirScan(context, scan);
+      }
     }
   }
 
@@ -62,8 +82,8 @@ class _HomePageState extends State<HomePage> {
           title: Text('Map'),
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.adb),
-          title: Text('Android'),
+          icon: Icon(Icons.computer),
+          title: Text('Pages'),
         ),
       ],
       currentIndex: currentIndex,

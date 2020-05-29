@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:qrapp/src/pages/home_page.dart';
+import 'package:qrapp/src/pages/mapa_page.dart';
 import 'package:qrapp/src/pages/mapas_page.dart';
  
 void main() => runApp(MyApp());
@@ -16,7 +17,8 @@ class MyApp extends StatelessWidget {
       initialRoute: 'home',
       routes: {
         'home' : (BuildContext context) => HomePage(),
-        'mapa' : (BuildContext context) => MapasPage()
+        'mapas' : (BuildContext context) => MapasPage(),
+        'mapa' : (BuildContext context) => MapaPage()
       },
       theme: ThemeData(
         primaryColor: Colors.red[300]
